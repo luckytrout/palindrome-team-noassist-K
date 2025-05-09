@@ -52,6 +52,7 @@ class ErrorHandler:
         """
         Show an error message box.
         """
+        ErrorHandler.show_popup(message, "error")
 
 
     @staticmethod
@@ -59,10 +60,12 @@ class ErrorHandler:
         """
         Show an information message box.
         """
+        ErrorHandler.show_popup(message, "info")
     
     @staticmethod
     def show_failure(title: str, message: str):
         """
         Show a failure message box.
         """
+        ErrorHandler.show_popup(message, "error")
         
