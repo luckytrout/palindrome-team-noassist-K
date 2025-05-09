@@ -37,8 +37,11 @@ class ErrorHandler:
 
         popup = Toplevel()
         popup.title(title_map.get(level, "Message"))
+        popup.geometry("300x150")
+        popup.resizable(False, False)
         popup.attributes("-topmost", True)
 
+        
         label = Label(popup, text=message, font=("Arial", 12), fg=colors.get(level, "black"), wraplength=280, justify="center")
         label.pack(pady=20)
 
