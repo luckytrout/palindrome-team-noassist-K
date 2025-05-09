@@ -1,0 +1,31 @@
+
+Palindrome Puzzle Game - Project Definition
+Overview:
+This is a desktop application built using Python and Tkinter. It is designed as a
+one-user puzzle-style game that visually checks for palindromes.
+Features:
+- Displays a welcome message upon launch.
+- Accepts a word via a text input field.
+- Displays the word in individual letter boxes.
+- Displays the reversed version of the word aligned directly beneath the input.
+- Provides menu options to:
+- Save the word to a dictionary (only if it is a valid palindrome).
+- Show all saved palindrome words.
+- Show the total number of attempts.
+- Show the number of failed attempts.
+- Show the number of successful attempts.
+- Exit the application.
+- Displays result messages such as:
+- "You are successful!" for correct palindromes.
+- "You failed. Again!" for non-palindromes.
+- Records and displays the date of last access.
+- Data is saved in a local JSON file for persistence between sessions.
+Intended Use:
+This project is designed for educational use in labs exploring productivity metrics
+with and without AI code-assist tools like GitHub Copilot or ChatGPT.
+Additional Feature (Optional - Week 2):
+Track and display the number of palindromes entered, compute the average length,
+and compare each new palindrome against this average with a dynamic feedback
+message.
+Version:
+Python Desktop Application using Tkinter.
