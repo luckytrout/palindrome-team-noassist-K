@@ -1,9 +1,10 @@
-
+import re
 import tkinter as tk
 from tkinter import messagebox
 import datetime
 import os
 import json
+from palindrome_stats import PalindromeStats
 
 DATA_FILE = 'palindrome_data.json'
 leaderboard = []
@@ -28,11 +29,21 @@ def save_data(data):
         json.dump(data, f, indent=4)
 
 
+def get_palindrome_type(text: str) -> str:
+    """
+    returns 'single-word' if text (ignoring punctuation) has no spaces,
+    otherwise 'phrase'
+    """
+    cleaned = re.sub(r'[^A-Za-z0-9 ]+', '', text).strip()
+    return 'phrase' if ' ' in cleaned else 'single-word'
+
+
 class PalindromeApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Palindrome Puzzle Game")
         self.data = load_data()
+        self.stats = PalindromeStats(self.data)     # stats
 
         self.label = tk.Label(
             root, text="Welcome to the Palindrome Puzzle Game!", font=("Arial", 14))
@@ -62,8 +73,11 @@ class PalindromeApp:
         game_menu.add_command(label="Attempts", command=self.show_attempts)
         game_menu.add_command(label="Successes", command=self.show_successes)
         game_menu.add_command(label="Failures", command=self.show_failures)
+
         game_menu.add_command(label="Show Leaderboard",
                               command=self.show_leaderboard)
+        game_menu.add_command(label="Average Palindrome Length", command=self.show_average_length)
+
         game_menu.add_separator()
         game_menu.add_command(label="Exit", command=root.quit)
 
@@ -107,6 +121,11 @@ class PalindromeApp:
                     leaderboard[leaderboard.index(min_word)] = word.lower()
 
             self.data['successes'] += 1
+            
+            self.stats.update_stats(word)
+            feedback = self.stats.compare_to_average(word)
+            messagebox.showinfo("Palindrome Feedback", feedback)
+
         else:
             messagebox.showerror("Result", "You failed. Again!")
             self.data['failures'] += 1
@@ -156,6 +175,13 @@ class PalindromeApp:
         messagebox.showinfo(
             "Leaderboard", f"Top 3: {leaderboard_map}")
 
+
+    def show_average_length(self):
+        avg = self.stats.get_average_length()
+        if avg == 0:
+            messagebox.showinfo("Average Length", "No palindromes entered yet.")
+        else:
+            messagebox.showinfo("Average Length", f"Average palindrome length: {avg:.2f}")
 
 if __name__ == "__main__":
     root = tk.Tk()
