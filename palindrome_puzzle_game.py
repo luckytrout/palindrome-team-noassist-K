@@ -7,6 +7,8 @@ import json
 from palindrome_stats import PalindromeStats
 
 DATA_FILE = 'palindrome_data.json'
+leaderboard = []
+
 
 def load_data():
     if os.path.exists(DATA_FILE):
@@ -21,9 +23,11 @@ def load_data():
             "last_access": str(datetime.datetime.now())
         }
 
+
 def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=4)
+
 
 def get_palindrome_type(text: str) -> str:
     """
@@ -33,6 +37,7 @@ def get_palindrome_type(text: str) -> str:
     cleaned = re.sub(r'[^A-Za-z0-9 ]+', '', text).strip()
     return 'phrase' if ' ' in cleaned else 'single-word'
 
+
 class PalindromeApp:
     def __init__(self, root):
         self.root = root
@@ -40,13 +45,15 @@ class PalindromeApp:
         self.data = load_data()
         self.stats = PalindromeStats(self.data)     # stats
 
-        self.label = tk.Label(root, text="Welcome to the Palindrome Puzzle Game!", font=("Arial", 14))
+        self.label = tk.Label(
+            root, text="Welcome to the Palindrome Puzzle Game!", font=("Arial", 14))
         self.label.pack(pady=10)
 
         self.entry = tk.Entry(root, font=("Arial", 14))
         self.entry.pack(pady=5)
 
-        self.check_button = tk.Button(root, text="Check", command=self.check_palindrome)
+        self.check_button = tk.Button(
+            root, text="Check", command=self.check_palindrome)
         self.check_button.pack(pady=5)
 
         self.letters_frame = tk.Frame(root)
@@ -61,15 +68,21 @@ class PalindromeApp:
         game_menu = tk.Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Menu", menu=game_menu)
         game_menu.add_command(label="Save Word", command=self.save_word)
-        game_menu.add_command(label="Show Saved Words", command=self.show_words)
+        game_menu.add_command(label="Show Saved Words",
+                              command=self.show_words)
         game_menu.add_command(label="Attempts", command=self.show_attempts)
         game_menu.add_command(label="Successes", command=self.show_successes)
         game_menu.add_command(label="Failures", command=self.show_failures)
+
+        game_menu.add_command(label="Show Leaderboard",
+                              command=self.show_leaderboard)
         game_menu.add_command(label="Average Palindrome Length", command=self.show_average_length)
+
         game_menu.add_separator()
         game_menu.add_command(label="Exit", command=root.quit)
 
-        self.last_access_label = tk.Label(root, text=f"Last access: {self.data['last_access']}", font=("Arial", 10))
+        self.last_access_label = tk.Label(
+            root, text=f"Last access: {self.data['last_access']}", font=("Arial", 10))
         self.last_access_label.pack(pady=5)
 
     def check_palindrome(self):
@@ -77,19 +90,36 @@ class PalindromeApp:
         self.clear_frames()
 
         if not word.isalpha():
-            messagebox.showwarning("Invalid input", "Please enter alphabetic characters only.")
+            messagebox.showwarning(
+                "Invalid input", "Please enter alphabetic characters only.")
             return
 
         self.data['attempts'] += 1
 
         for char in word:
-            tk.Label(self.letters_frame, text=char, font=("Courier", 18)).pack(side=tk.LEFT)
+            tk.Label(self.letters_frame, text=char, font=(
+                "Courier", 18)).pack(side=tk.LEFT)
 
         for char in word[::-1]:
-            tk.Label(self.reverse_frame, text=char, font=("Courier", 18)).pack(side=tk.LEFT)
+            tk.Label(self.reverse_frame, text=char, font=(
+                "Courier", 18)).pack(side=tk.LEFT)
 
         if word.lower() == word[::-1].lower():
             messagebox.showinfo("Result", "You are successful!")
+            if len(leaderboard) < 3:
+                leaderboard.append(word)
+            else:
+                # find the smallest word
+                min_word = None
+                for wrd in leaderboard:
+                    if not min_word:
+                        min_word = wrd
+                    else:
+                        if len(min_word) > len(wrd):
+                            min_word = wrd
+                if len(leaderboard[leaderboard.index(min_word)]) < len(word.lower()):
+                    leaderboard[leaderboard.index(min_word)] = word.lower()
+
             self.data['successes'] += 1
             
             self.stats.update_stats(word)
@@ -119,20 +149,32 @@ class PalindromeApp:
             else:
                 messagebox.showinfo("Duplicate", f"'{word}' is already saved.")
         else:
-            messagebox.showwarning("Not a Palindrome", "Only palindromes can be saved.")
+            messagebox.showwarning(
+                "Not a Palindrome", "Only palindromes can be saved.")
 
     def show_words(self):
         words = self.data['saved_words']
-        messagebox.showinfo("Saved Words", "\n".join(words) if words else "No words saved yet.")
+        messagebox.showinfo("Saved Words", "\n".join(
+            words) if words else "No words saved yet.")
 
     def show_attempts(self):
-        messagebox.showinfo("Attempts", f"Total attempts: {self.data['attempts']}")
+        messagebox.showinfo(
+            "Attempts", f"Total attempts: {self.data['attempts']}")
 
     def show_successes(self):
-        messagebox.showinfo("Successes", f"Successful attempts: {self.data['successes']}")
+        messagebox.showinfo(
+            "Successes", f"Successful attempts: {self.data['successes']}")
 
     def show_failures(self):
-        messagebox.showinfo("Failures", f"Failed attempts: {self.data['failures']}")
+        messagebox.showinfo(
+            "Failures", f"Failed attempts: {self.data['failures']}")
+
+    def show_leaderboard(self):
+        leaderboard_map = [(word, len(word)) for word in leaderboard]
+        print(leaderboard_map)
+        messagebox.showinfo(
+            "Leaderboard", f"Top 3: {leaderboard_map}")
+
 
     def show_average_length(self):
         avg = self.stats.get_average_length()
