@@ -5,6 +5,7 @@ import datetime
 import os
 import json
 from palindrome_stats import PalindromeStats
+from palindrome_error_handler import ErrorHandler
 
 DATA_FILE = 'palindrome_data.json'
 leaderboard = []
@@ -53,7 +54,7 @@ class PalindromeApp:
         self.entry.pack(pady=5)
 
         self.check_button = tk.Button(
-            root, text="Check", command=self.check_palindrome)
+        root, text="Check", command=self.check_palindrome)
         self.check_button.pack(pady=5)
 
         self.letters_frame = tk.Frame(root)
@@ -89,9 +90,7 @@ class PalindromeApp:
         word = self.entry.get().strip()
         self.clear_frames()
 
-        if not word.isalpha():
-            messagebox.showwarning(
-                "Invalid input", "Please enter alphabetic characters only.")
+        if not ErrorHandler.validate_input(word):
             return
 
         self.data['attempts'] += 1
@@ -105,7 +104,6 @@ class PalindromeApp:
                 "Courier", 18)).pack(side=tk.LEFT)
 
         if word.lower() == word[::-1].lower():
-            messagebox.showinfo("Result", "You are successful!")
             if len(leaderboard) < 3:
                 leaderboard.append(word)
             else:
@@ -124,10 +122,11 @@ class PalindromeApp:
             
             self.stats.update_stats(word)
             feedback = self.stats.compare_to_average(word)
-            messagebox.showinfo("Palindrome Feedback", feedback)
+            ErrorHandler.show_info("Result", "You are successful\n" + feedback)
+  
 
         else:
-            messagebox.showerror("Result", "You failed. Again!")
+            ErrorHandler.show_failure("Result", "You failed. Again!")
             self.data['failures'] += 1
 
         self.data['last_access'] = str(datetime.datetime.now())
@@ -145,37 +144,32 @@ class PalindromeApp:
             if word not in self.data['saved_words']:
                 self.data['saved_words'].append(word)
                 save_data(self.data)
-                messagebox.showinfo("Saved", f"'{word}' saved to dictionary.")
+                ErrorHandler.show_info("Saved", f"'{word}' saved to dictionary.")
             else:
-                messagebox.showinfo("Duplicate", f"'{word}' is already saved.")
+               ErrorHandler.show_info("Duplicate", f"'{word}' is already saved.")
         else:
-            messagebox.showwarning(
-                "Not a Palindrome", "Only palindromes can be saved.")
+            ErrorHandler.show_error("Not a Palindrome", "Only palindromes can be saved.")
 
     def show_words(self):
         words = self.data['saved_words']
-        messagebox.showinfo("Saved Words", "\n".join(
-            words) if words else "No words saved yet.")
+        ErrorHandler.showinfo("Saved Words", "\n".join(
+            words) if words else "No words saved yet.", "info")
 
     def show_attempts(self):
-        messagebox.showinfo(
-            "Attempts", f"Total attempts: {self.data['attempts']}")
+        ErrorHandler.show_info("Attempts", f"Total attempts: {self.data['attempts']}")
 
     def show_successes(self):
-        messagebox.showinfo(
-            "Successes", f"Successful attempts: {self.data['successes']}")
+        ErrorHandler.show_info("Successes", f"Successful attempts: {self.data['successes']}")
 
     def show_failures(self):
-        messagebox.showinfo(
-            "Failures", f"Failed attempts: {self.data['failures']}")
-
+        ErrorHandler.show_info("Failures", f"Failed attempts: {self.data['failures']}")
+        
     def show_leaderboard(self):
         leaderboard_map = [(word, len(word)) for word in leaderboard]
         print(leaderboard_map)
         messagebox.showinfo(
             "Leaderboard", f"Top 3: {leaderboard_map}")
-
-
+        
     def show_average_length(self):
         avg = self.stats.get_average_length()
         if avg == 0:
