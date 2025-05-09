@@ -1,4 +1,4 @@
-
+import re
 import tkinter as tk
 from tkinter import messagebox
 import datetime
@@ -24,6 +24,14 @@ def load_data():
 def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=4)
+
+def get_palindrome_type(text: str) -> str:
+    """
+    returns 'single-word' if text (ignoring punctuation) has no spaces,
+    otherwise 'phrase'
+    """
+    cleaned = re.sub(r'[^A-Za-z0-9 ]+', '', text).strip()
+    return 'phrase' if ' ' in cleaned else 'single-word'
 
 class PalindromeApp:
     def __init__(self, root):
